@@ -14,24 +14,33 @@ app.get("/", (_req, res) => {
 })
 
 app.get("/campaigns", (_req, res) => {
-	let campaigns = db.query("SELECT * FROM campaign;").get()
+	let campaigns = db.query("SELECT * FROM campaign;").all()
 	res.send(campaigns)
 })
 
+app.get("/campaign/:campaignId", (req, res) => {
+	let query = db.query("SELECT * FROM campaign WHERE id = $campaignId")
+	let campaign = query.get({ $campaignId: req.params.campaignId })
+	if (campaign) {
+		res.send(campaign)
+	} else {
+		res.send("No campaign")
+	}
+})
+
 app.post("/campaign", (req, res) => {
-	let query = db.query("INSERT INTO campaign (name, owner_id, description, notes, parent_id) VALUES ($name, $owner_id, $description, $notes, $parent_id);")
+	let query = db.query("INSERT INTO campaign (name, owner_id, description, notes) VALUES ($name, $owner_id, $description, $notes);")
 	query.run({
 		$name: req.body.name,
 		$owner_id: req.body.owner_id,
 		$description: req.body.description,
 		$notes: req.body.notes,
-		$parent_id: req.body.parent_id,
 	})
 	res.send("campaign added")
 })
 
 app.get("/users", (_req, res) => {
-	let users = db.query("SELECT * FROM user;").get()
+	let users = db.query("SELECT * FROM user;").all()
 	res.send(users)
 })
 
@@ -39,6 +48,16 @@ app.post("/user", (req, res) => {
 	let query = db.query("INSERT INTO user (username) VALUES ($username);")
 	query.run({ $username: req.body.username })
 	res.send("user added")
+})
+
+app.get("/user/:userId", (req, res) => {
+	let query = db.query("SELECT * FROM user WHERE id = $userId;")
+	let user = query.get({ $userId: req.params.userId })
+	if (user) {
+		res.send(user)
+	} else {
+		res.send("No user")
+	}
 })
 
 app.listen(port, () => {
